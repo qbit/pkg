@@ -23,9 +23,9 @@
 .Sh SYNOPSIS
 .Nm
 .Op Ar delete Ar package
-.Op Ar install Ar package
 .Op Ar info Ar package
-.Op Ar pathinfo Ar pkgpath
+.Op Ar install Ar package
+.Op Ar pkginfo Ar package
 .Op Ar search Ar string
 .Sh DESCRIPTION
 .Nm
@@ -41,15 +41,56 @@ The options are as follows:
 .Bl -tag -width Ds
 .It Ar delete package
 Deletes
-.Nm package
+.Nm package .
+This is a wrapper for
+.Xr pkg_delete 1
 .
-.It Ar install package
+It is also aliased to
+.Nm del ,
+and
+.Nm rm .
 .It Ar info package
-.It Ar pathinfo package
+Fetches
+.Nm package
+information.
+This is a wrapper for
+.Xr pkg_info 1
+.
+It is aliased to
+.Nm inf .
+.It Ar install package
+A wrapper for
+.Xr pkg_add 1 .
+Aliased to
+.Nm i .
+.It Ar pkginfo FULLPKGNAME
+Intended for use with tools like
+.Xr fzf 1 .
+This lets one quickly look up
+.Nm COMMENT
+and
+.Nm DESCRIPTION
+for a given
+.Nm FULLPKGNAME .
+Aliased to
+.Nm pi .
 .It Ar search string
-Search a packages COMMENT and DESCR for an arbitrary string.
-.Nm
+Search a packages
+.Nm COMMENT
+and
+.Nm DESCR
+for an arbitrary string.
+Returns
+.Nm FULLPKGNAME .
 .El
+.Sh HISTORY
+.Nm
+was written in 2001, removed from base in 2012, revived and enhanced in 2018
+and 2022.
 .Sh AUTHORS
 .An -nosplit
 .Nm
+was originally written by
+.An Marc Espie Aq Mt espie@openbsd.org .
+Rewrite by
+.An Aaron Bieber Aq Mt abieber@openbsd.org .

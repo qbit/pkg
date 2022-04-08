@@ -22,16 +22,16 @@ use DBI;
 
 $| = 1;
 
-my @l = qw(add check create delete info search pkgname);
+my @l = qw(add check create delete info search pkginfo);
 my %a = (
-    "install" => "add",
-    "i"       => "add",
-    "rm"      => "delete",
     "del"     => "delete",
+    "i"       => "add",
+    "install" => "add",
+    "rm"      => "delete",
 
     "inf" => "info",
-    "s"   => "search",
-    "pi"  => "pathinfo"
+    "pi"  => "pkginfo",
+    "s"   => "search"
 );
 
 my $srcDBfile = '/usr/local/share/sqlports';
@@ -105,7 +105,7 @@ if (@ARGV) {
         $ARGV[0] = $a{ $ARGV[0] } if defined $a{ $ARGV[0] };
         if ( $ARGV[0] eq $i ) {
             shift;
-            if ( $i eq "info" ) {
+            if ( $i eq "pkginfo" ) {
 
                 # Take a FULLPKGNAME and return DESCR_CONTENTS and COMMENT
                 my $ssth = $dbh->prepare(
