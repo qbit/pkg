@@ -31,7 +31,7 @@ The options are as follows:
 > Deletes
 > **package**.
 > This is a wrapper for
-> pkg\_delete(1)
+> pkg\_delete(1).
 > It is also aliased to
 > **del**,
 > and
