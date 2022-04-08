@@ -17,5 +17,7 @@ check-n-tidy:
 	@perl -c pkg.pl
 	@perltidy pkg.pl -st | diff -q pkg.pl -
 	@mandoc -T lint -W style pkg.8
+	@mandoc -T markdown pkg.8 | diff -q README.md -
+
 
 .include <bsd.prog.mk>
