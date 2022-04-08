@@ -1,4 +1,0 @@
-zpkg() {
-	/usr/local/sbin/pkg search "$@" | \
-		fzf --preview "/usr/local/sbin/pkg info {1}"
-}
