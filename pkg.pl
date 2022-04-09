@@ -135,25 +135,40 @@ if (@ARGV) {
                     q{
 		    SELECT
 			FULLPKGNAME,
-			FULLPKGPATH,
-			COMMENT,
-			DESCRIPTION,
 			highlight(ports_fts, 2, '[', ']') AS COMMENT_MATCH,
-			highlight(ports_fts, 3, '[', ']') AS DESCR_MATCH
+			snippet(ports_fts, 3, '[', ']', '', 15) AS DESCR_MATCH
 		    FROM ports_fts
 		    WHERE ports_fts MATCH ? ORDER BY rank;
 		}
                 );
                 $ssth->bind_param( 1, join( " ", @ARGV ) );
                 $ssth->execute();
-                while ( my $row = $ssth->fetchrow_hashref ) {
+		my $rows = $ssth->fetchall_arrayref();
 
-                    #print "$row->{FULLPKGNAME}\n";
-                    my $l = 20 - length( $row->{FULLPKGNAME} );
-                    $l = 1 if $l <= 0;
+		my $len_pkg = 0;
+		my $len_cmnt = 0;
+		my @clean_rows = map {
+		    my $lp = length($_->[0]);
+		    my $lc = length($_->[1]);
+
+		    $len_pkg = $lp if $lp > $len_pkg;
+		    $len_cmnt = $lc if $lc > $len_cmnt;
+
+		    $_->[2] =~ s/\n+/ /g;
+		    $_->[2] = "...$_->[2]...";
+		    $_;
+		} @{$rows};
+
+		foreach my $row (@clean_rows) {
+                    my $l  = $len_pkg+0 - length( $row->[0] );
+                    my $cl = $len_cmnt+0 - length( $row->[1] );
+                    $l  = 1 if $l <= 0;
+                    $cl = 1 if $cl <= 0;
+
                     print(
-                        $row->{FULLPKGNAME},   " " x $l,
-                        $row->{COMMENT_MATCH}, "\n"
+                        $row->[0],   " " x $l,
+                        $row->[1], " " x $cl,
+                        $row->[2], "\n"
                     );
                 }
                 exit();
