@@ -136,8 +136,8 @@ if (@ARGV) {
 			FULLPKGPATH,
 			COMMENT,
 			DESCRIPTION,
-			highlight(ports_fts, 1, '[', ']') AS COMMENT_MATCH,
-			highlight(ports_fts, 2, '[', ']') AS DESCR_MATCH
+			highlight(ports_fts, 2, '[', ']') AS COMMENT_MATCH,
+			highlight(ports_fts, 3, '[', ']') AS DESCR_MATCH
 		    FROM ports_fts
 		    WHERE ports_fts MATCH ? ORDER BY rank;
 		}
@@ -145,7 +145,14 @@ if (@ARGV) {
                 $ssth->bind_param( 1, join( " ", @ARGV ) );
                 $ssth->execute();
                 while ( my $row = $ssth->fetchrow_hashref ) {
-                    print "$row->{FULLPKGNAME}\n";
+
+                    #print "$row->{FULLPKGNAME}\n";
+                    my $l = 20 - length( $row->{FULLPKGNAME} );
+                    $l = 1 if $l <= 0;
+                    print(
+                        $row->{FULLPKGNAME},   " " x $l,
+                        $row->{COMMENT_MATCH}, "\n"
+                    );
                 }
                 exit();
             }
