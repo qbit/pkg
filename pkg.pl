@@ -22,16 +22,22 @@ use DBI;
 
 $| = 1;
 
-my @l = qw(add check create delete info search pkginfo);
+my @l = qw(add check create delete info search pkginfo regen);
+
+# Commands that we wrap.
 my %a = (
     "del"     => "delete",
     "i"       => "add",
     "install" => "add",
     "rm"      => "delete",
+    "inf"     => "info",
+);
 
-    "inf" => "info",
-    "pi"  => "pkginfo",
-    "s"   => "search"
+# Commands that are unique to pkg.
+my %b = (
+    "pi" => "pkginfo",
+    "re" => "regen",
+    "s"  => "search"
 );
 
 my $srcDBfile = '/usr/local/share/sqlports';
@@ -46,7 +52,7 @@ sub run_sql {
     return $sth;
 }
 
-if ( !-e $dbfile ) {
+sub createIDX {
     print STDERR "Creating full text database...";
     my $dbh = DBI->connect( "dbi:SQLite:dbname=:memory:", "", "" );
     run_sql( $dbh, "ATTACH DATABASE '$srcDBfile' AS ports;" );
@@ -84,10 +90,17 @@ if ( !-e $dbfile ) {
     print STDERR "Done.\n";
 }
 
+my $db_built = 0;
+if ( !-e $dbfile ) {
+    $db_built = 1;
+    createIDX();
+}
+
 $dbh = DBI->connect( "dbi:SQLite:dbname=$dbfile", "", "" );
 
 sub run {
     my ( $cmd, $name ) = @_;
+    return if $b{$name};
     my $module = "OpenBSD::Pkg\u$cmd";
     eval "require $module;";
     if ($@) {
@@ -107,6 +120,11 @@ if (@ARGV) {
         $ARGV[0] = $a{ $ARGV[0] } if defined $a{ $ARGV[0] };
         if ( $ARGV[0] eq $i ) {
             shift;
+            if ( $i eq "regen" && $db_built == 0 ) {
+                unlink($dbfile);
+                createIDX();
+                exit();
+            }
             if ( $i eq "pkginfo" ) {
 
                 # Take a FULLPKGNAME and return DESCR_CONTENTS and COMMENT

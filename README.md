@@ -11,6 +11,7 @@ PKG(8) - System Manager's Manual
 \[*info*&nbsp;*package*]
 \[*install*&nbsp;*package*]
 \[*pkginfo*&nbsp;*package*]
+\[*regen*]
 \[*search*&nbsp;*string*]
 
 # DESCRIPTION
@@ -66,6 +67,12 @@ The options are as follows:
 > **FULLPKGNAME**.
 > Aliased to
 > **pi**.
+
+*regen*
+
+> Regenerate the full text index.
+> Aliased to
+> **re**.
 
 *search string*
 
