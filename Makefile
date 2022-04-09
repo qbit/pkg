@@ -13,6 +13,9 @@ readme: pkg.8
 
 regress: check-n-tidy
 
+tidy:
+	@perltidy -b pkg.pl
+
 check-n-tidy:
 	@perl -c pkg.pl
 	@perltidy pkg.pl -st | diff -q pkg.pl -
