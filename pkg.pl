@@ -49,8 +49,7 @@ sub run_sql {
 if ( !-e $dbfile ) {
     print STDERR "Creating full text database...";
     my $dbh = DBI->connect( "dbi:SQLite:dbname=:memory:", "", "" );
-    $dbh->sqlite_backup_from_file($srcDBfile)
-      or die "Can't copy sqlports to memory!";
+    run_sql( $dbh, "ATTACH DATABASE '$srcDBfile' AS ports;" );
     run_sql(
         $dbh, q{
 	CREATE VIRTUAL TABLE
@@ -73,7 +72,7 @@ if ( !-e $dbfile ) {
 	    comment,
 	    _descr.value
 	FROM
-	    _ports
+	    ports._ports
 	JOIN _paths ON _paths.id=_ports.fullpkgpath
 	JOIN _descr ON _descr.fullpkgpath=_ports.fullpkgpath;
     }
