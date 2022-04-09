@@ -67,12 +67,15 @@ if ( !-e $dbfile ) {
 	INSERT INTO
 	    ports_fts
 	(FULLPKGNAME, FULLPKGPATH, COMMENT, DESCRIPTION)
-	select
-	    FULLPKGNAME,
-	    FULLPKGPATH,
-	    COMMENT,
-	    DESCR_CONTENTS
-	FROM Ports;
+	SELECT
+	    fullpkgname,
+	    _paths.fullpkgpath,
+	    comment,
+	    _descr.value
+	FROM
+	    _ports
+	JOIN _paths ON _paths.id=_ports.fullpkgpath
+	JOIN _descr ON _descr.fullpkgpath=_ports.fullpkgpath;
     }
     );
 
