@@ -22,15 +22,28 @@ use DBI;
 
 $| = 1;
 
-my @l = qw(add check create delete info search pkginfo regen);
+my @l = qw(
+  add
+  check
+  create
+  delete
+  help
+  info
+  pkginfo
+  regen
+  search
+);
 
 # Commands that we wrap.
 my %a = (
+    "chk"     => "check",
+    "cr"      => "create",
     "del"     => "delete",
+    "h"       => "help",
     "i"       => "add",
-    "install" => "add",
-    "rm"      => "delete",
     "inf"     => "info",
+    "install" => "add",
+    "rm"      => "delete"
 );
 
 # Commands that are unique to pkg.
@@ -39,6 +52,8 @@ my %b = (
     "re" => "regen",
     "s"  => "search"
 );
+
+my %opts = ( %a, %b );
 
 my $srcDBfile = '/usr/local/share/sqlports';
 my $dbfile    = '/tmp/sqlports.fts';
@@ -102,7 +117,9 @@ sub run {
     my ( $cmd, $name ) = @_;
     return if $b{$name};
     my $module = "OpenBSD::Pkg\u$cmd";
-    eval "require $module;";
+    ## no critic
+    eval "require $module";
+    ## use critic
     if ($@) {
         die $@;
     }
@@ -117,9 +134,13 @@ for my $i (@l) {
 
 if (@ARGV) {
     for my $i (@l) {
-        $ARGV[0] = $a{ $ARGV[0] } if defined $a{ $ARGV[0] };
+        $ARGV[0] = $opts{ $ARGV[0] } if defined $opts{ $ARGV[0] };
         if ( $ARGV[0] eq $i ) {
             shift;
+            if ( $i eq "help" ) {
+                usage();
+                exit();
+            }
             if ( $i eq "regen" && $db_built == 0 ) {
                 unlink($dbfile);
                 createIDX();
@@ -165,8 +186,6 @@ if (@ARGV) {
                 $ssth->bind_param( 1, join( " ", @ARGV ) );
                 $ssth->execute();
                 while ( my $row = $ssth->fetchrow_hashref ) {
-
-                    #print "$row->{FULLPKGNAME}\n";
                     my $l = 20 - length( $row->{FULLPKGNAME} );
                     $l = 1 if $l <= 0;
                     print(
@@ -183,5 +202,27 @@ if (@ARGV) {
     }
 }
 
-print STDERR "Usage: pkg [", join( "|", @l ), "] [args]\n";
+sub usage {
+    keys %opts;
+    my %u_opts;
+    while ( my ( $key, $val ) = each %opts ) {
+        $u_opts{$val} = [] unless defined $u_opts{$val};
+
+        #print "$key\n";
+        push( @{ $u_opts{$val} }, $key );
+    }
+
+    print STDERR "Usage: pkg [";
+    my $c   = 1;
+    my $len = @l;
+    for my $v (@l) {
+        next unless $v;
+        print STDERR $v, ",", join( ",", sort @{ $u_opts{$v} } );
+        print STDERR "|" unless $c >= $len;
+        $c++;
+    }
+    print STDERR "] [args]\n";
+}
+
+usage();
 exit(1);
