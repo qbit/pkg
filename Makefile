@@ -16,8 +16,12 @@ regress: check-n-tidy
 tidy:
 	@perltidy -b pkg.pl
 
+clean:
+	rm -f *.bak
+
 check-n-tidy:
 	@perl -c pkg.pl
+	@perlcritic pkg.pl
 	@perltidy pkg.pl -st | diff -q pkg.pl -
 	@mandoc -T lint -W style pkg.8
 	@mandoc -T markdown pkg.8 | diff -q README.md -
