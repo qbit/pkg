@@ -100,7 +100,7 @@ sub createIDX {
     );
 
     $dbh->sqlite_backup_to_file($dbfile)
-      or die "Can't copy sqlports to memory!";
+      or die $!;
     $dbh->disconnect();
     print STDERR "Done.\n";
 }
