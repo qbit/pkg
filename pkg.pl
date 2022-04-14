@@ -115,11 +115,14 @@ $dbh = DBI->connect( "dbi:SQLite:dbname=$dbfile", "", "" );
 
 sub run {
     my ( $cmd, $name ) = @_;
-    return if $b{$name};
+    return if defined $b{$name};
+
     my $module = "OpenBSD::Pkg\u$cmd";
+
     ## no critic
     eval "require $module";
     ## use critic
+
     if ($@) {
         die $@;
     }
