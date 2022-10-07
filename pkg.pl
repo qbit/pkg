@@ -19,10 +19,13 @@
 use strict;
 use warnings;
 use DBI;
+use Data::Dumper;
+
+use v5.32;
 
 $| = 1;
 
-my @l = qw(add check create delete info search pkginfo regen);
+my @l = qw(add check create delete info search pkginfo regen tree);
 
 # Commands that we wrap.
 my %a = (
@@ -30,19 +33,21 @@ my %a = (
     "i"       => "add",
     "install" => "add",
     "rm"      => "delete",
-    "inf"     => "info",
+    "inf"     => "info"
 );
 
 # Commands that are unique to pkg.
 my %b = (
     "pi" => "pkginfo",
     "re" => "regen",
-    "s"  => "search"
+    "s"  => "search",
+    "t"  => "tree",
 );
 
 my $srcDBfile = '/usr/local/share/sqlports';
 my $dbfile    = '/tmp/sqlports.fts';
 my $dbh;
+my $spdbh;
 
 sub run_sql {
     my ( $dbh, $sql ) = @_;
@@ -96,7 +101,8 @@ if ( !-e $dbfile ) {
     createIDX();
 }
 
-$dbh = DBI->connect( "dbi:SQLite:dbname=$dbfile", "", "" );
+$dbh   = DBI->connect( "dbi:SQLite:dbname=$dbfile",    "", "" );
+$spdbh = DBI->connect( "dbi:SQLite:dbname=$srcDBfile", "", "" );
 
 sub run {
     my ( $cmd, $name ) = @_;
@@ -125,6 +131,35 @@ if (@ARGV) {
                 createIDX();
                 exit();
             }
+
+            if ( $i eq "tree" ) {
+                my $ssth = $spdbh->prepare(
+                    q{
+		  WITH RECURSIVE
+		  under_port(name,level) AS (
+		    VALUES(? ,0)
+		    UNION ALL
+		    SELECT _depends.fulldepends, under_port.level+1
+		      FROM
+			_depends
+		      JOIN _paths ON _paths.id=_depends.fullpkgpath
+		      join under_port ON _paths.fullpkgpath = under_port.name
+		      where
+			_depends.type IN (0, 1)
+		     ORDER BY 2 DESC
+		  )
+		SELECT substr('..........',1,level*3) || name FROM under_port;
+		}
+                );
+                $ssth->bind_param( 1, $ARGV[0] );
+                $ssth->execute();
+                my $data = $ssth->fetchall_arrayref( [0] );
+                for my $line ( @{$data} ) {
+                    say $line->[0];
+                }
+                exit();
+            }
+
             if ( $i eq "pkginfo" ) {
 
                 # Take a FULLPKGNAME and return DESCR_CONTENTS and COMMENT
