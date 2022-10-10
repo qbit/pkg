@@ -197,7 +197,9 @@ if (@ARGV) {
 		    WHERE ports_fts MATCH ? ORDER BY rank;
 		}
                 );
-                $ssth->bind_param( 1, join( " ", @ARGV ) );
+                my $search = join( " ", @ARGV );
+                $search =~ s/[^\w]/ /g;
+                $ssth->bind_param( 1, $search );
                 $ssth->execute();
                 while ( my $row = $ssth->fetchrow_hashref ) {
 
