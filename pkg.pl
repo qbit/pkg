@@ -181,7 +181,9 @@ if (@ARGV) {
                 while ( my $row = $ssth->fetchrow_hashref ) {
                     print "Comment:\n$row->{COMMENT}\n\n";
                     print "Description:\n$row->{DESCRIPTION}\n";
-                    print "Homepage:\n$row->{HOMEPAGE}\n";
+                    if($row->{HOMEPAGE}) {
+                        print "Homepage:\n$row->{HOMEPAGE}\n";
+                    }
                 }
                 exit();
             }
