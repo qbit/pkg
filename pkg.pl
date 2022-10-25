@@ -69,19 +69,21 @@ sub createIDX {
 	    FULLPKGNAME,
 	    FULLPKGPATH,
 	    COMMENT,
-	    DESCRIPTION);
+	    DESCRIPTION,
+            HOMEPAGE);
     }
     );
     run_sql(
         $dbh, q{
 	INSERT INTO
 	    ports_fts
-	(FULLPKGNAME, FULLPKGPATH, COMMENT, DESCRIPTION)
+	(FULLPKGNAME, FULLPKGPATH, COMMENT, DESCRIPTION, HOMEPAGE)
 	SELECT
 	    fullpkgname,
 	    _paths.fullpkgpath,
 	    comment,
-	    _descr.value
+	    _descr.value,
+	    _ports.homepage
 	FROM
 	    ports._ports
 	JOIN _paths ON _paths.id=_ports.fullpkgpath
@@ -167,7 +169,8 @@ if (@ARGV) {
                     q{
 		    SELECT
 			COMMENT,
-			DESCRIPTION
+			DESCRIPTION,
+			HOMEPAGE
 		    FROM ports_fts
 		    WHERE
 			FULLPKGNAME = ?;
@@ -178,6 +181,7 @@ if (@ARGV) {
                 while ( my $row = $ssth->fetchrow_hashref ) {
                     print "Comment:\n$row->{COMMENT}\n\n";
                     print "Description:\n$row->{DESCRIPTION}\n";
+                    print "Homepage:\n$row->{HOMEPAGE}\n";
                 }
                 exit();
             }
